@@ -2702,6 +2702,8 @@ class ailiaSpeechFFI {
   /// @param vad_type AILIA_SPEECH_VAD_TYPE_*
   /// @return
   /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+  /// @details
+  /// VADを有効にするにはailiaSpeechSetSilentThresholdで判定しきい値を設定する必要があります。
   ///
   /// \~english
   /// @brief Set vad model for voice activity detection.
@@ -2710,6 +2712,8 @@ class ailiaSpeechFFI {
   /// @param vad_type AILIA_SPEECH_VAD_TYPE_*
   /// @return
   /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
+  /// @details
+  /// To enable VAD, you need to set the detection threshold using ailiaSpeechSetSilentThreshold.
   int ailiaSpeechOpenVadFileA(
     ffi.Pointer<AILIASpeech> net,
     ffi.Pointer<ffi.Char> vad_path,
@@ -2736,6 +2740,8 @@ class ailiaSpeechFFI {
   /// @param vad_type AILIA_SPEECH_VAD_TYPE_*
   /// @return
   /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+  /// @details
+  /// VADを有効にするにはailiaSpeechSetSilentThresholdで判定しきい値を設定する必要があります。
   ///
   /// \~english
   /// @brief Set vad model for voice activity detection.
@@ -2744,6 +2750,8 @@ class ailiaSpeechFFI {
   /// @param vad_type AILIA_SPEECH_VAD_TYPE_*
   /// @return
   /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
+  /// @details
+  /// To enable VAD, you need to set the detection threshold using ailiaSpeechSetSilentThreshold.
   int ailiaSpeechOpenVadFileW(
     ffi.Pointer<AILIASpeech> net,
     ffi.Pointer<ffi.WChar> vad_path,
@@ -2835,7 +2843,7 @@ class ailiaSpeechFFI {
               ffi.Pointer<AILIASpeech>, ffi.Pointer<ffi.WChar>, int)>();
 
   /// \~japanese
-  /// @brief 後処理知に適用するAIモデルを指定します。(MBSC)
+  /// @brief 後処理に適用するAIモデルを指定します。(MBSC)
   /// @param net ネットワークオブジェクトポインタ
   /// @param encoder_path onnxファイルのパス名(MBSC)
   /// @param decoder_path onnxファイルのパス名(MBSC)
@@ -2899,7 +2907,7 @@ class ailiaSpeechFFI {
               int)>();
 
   /// \~japanese
-  /// @brief 後処理知に適用するAIモデルを指定します。(UTF16)
+  /// @brief 後処理に適用するAIモデルを指定します。(UTF16)
   /// @param net ネットワークオブジェクトポインタ
   /// @param encoder_path onnxファイルのパス名(UTF16)
   /// @param decoder_path onnxファイルのパス名(UTF16)
@@ -3289,9 +3297,9 @@ class ailiaSpeechFFI {
   /// \~japanese
   /// @brief 無音判定の閾値を設定します。
   /// @param net ネットワークオブジェクトポインタ
-  /// @param silent_threshold  有音判定のしきい値
-  /// @param speech_sec    有音区間の時間（秒数）
-  /// @param no_speech_sec 無音区間の時間（秒数）
+  /// @param silent_threshold  有音判定のしきい値（標準値0.5）
+  /// @param speech_sec    有音区間の時間（秒数）（標準値1.0）
+  /// @param no_speech_sec 無音区間の時間（秒数）（標準値1.0）
   /// @return
   /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す
   /// @details
@@ -3300,9 +3308,9 @@ class ailiaSpeechFFI {
   /// \~english
   /// @brief Set silent threshold.
   /// @param net A network instance pointer
-  /// @param silent_threshold  volume threshold
-  /// @param speech_sec    speech time
-  /// @param no_speech_sec no_speech time
+  /// @param silent_threshold  volume threshold (Standard value 0.5)
+  /// @param speech_sec    speech time (sec) (Standard value 1.0)
+  /// @param no_speech_sec no_speech time (sec) (Standard value 1.0)
   /// @return
   /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
   /// @details
@@ -3385,7 +3393,7 @@ class ailiaSpeechFFI {
   /// 認識した結果はailiaSpeechGetText APIで取得します。
   ///
   /// \~english
-  /// @brief Speech recognition
+  /// @brief Perform speech recognition
   /// @param net A network instance pointer
   /// @return
   /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
@@ -4353,11 +4361,11 @@ typedef AILIASpeechText = _AILIASpeechText;
 
 const int __has_safe_buffers = 1;
 
-const int __DARWIN_ONLY_64_BIT_INO_T = 1;
+const int __DARWIN_ONLY_64_BIT_INO_T = 0;
 
 const int __DARWIN_ONLY_UNIX_CONFORMANCE = 1;
 
-const int __DARWIN_ONLY_VERS_1050 = 1;
+const int __DARWIN_ONLY_VERS_1050 = 0;
 
 const int __DARWIN_UNIX03 = 1;
 
@@ -4366,6 +4374,10 @@ const int __DARWIN_64_BIT_INO_T = 1;
 const int __DARWIN_VERS_1050 = 1;
 
 const int __DARWIN_NON_CANCELABLE = 0;
+
+const String __DARWIN_SUF_64_BIT_INO_T = '\$INODE64';
+
+const String __DARWIN_SUF_1050 = '\$1050';
 
 const String __DARWIN_SUF_EXTSN = '\$DARWIN_EXTSN';
 
@@ -4381,15 +4393,13 @@ const int __DARWIN_NO_LONG_LONG = 0;
 
 const int _DARWIN_FEATURE_64_BIT_INODE = 1;
 
-const int _DARWIN_FEATURE_ONLY_64_BIT_INODE = 1;
-
-const int _DARWIN_FEATURE_ONLY_VERS_1050 = 1;
-
 const int _DARWIN_FEATURE_ONLY_UNIX_CONFORMANCE = 1;
 
 const int _DARWIN_FEATURE_UNIX_CONFORMANCE = 3;
 
 const int __has_ptrcheck = 0;
+
+const int __has_bounds_safety_attributes = 0;
 
 const int __DARWIN_NULL = 0;
 
