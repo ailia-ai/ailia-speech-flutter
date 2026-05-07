@@ -10,5 +10,5 @@ ailia Speech is a library to perform speech recognition using AI. It provides a 
 
 ## API specification
 
-https://github.com/axinc-ai/ailia-sdk
+https://github.com/ailia-ai/ailia-sdk
 
