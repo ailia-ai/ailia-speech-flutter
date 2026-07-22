@@ -474,6 +474,27 @@ class AiliaSpeechModel {
     malloc.free(callback);
   }
 
+  // グラフの入力Shapeを指定秒数で固定する (openの前に呼び出す必要がある)
+  // 0を指定すると動的Shape(デフォルト)
+  void setStaticInputLength(int inputInSeconds) {
+    int status = ailiaSpeech.ailiaSpeechSetStaticInputLength(
+      ppAilia!.value,
+      inputInSeconds,
+    );
+    throwError("ailiaSpeechSetStaticInputLength", status);
+  }
+
+  // 指定したコンポーネントの実行環境(env_id)を個別に設定する (openの前に呼び出す必要がある)
+  // targetにはAILIA_SPEECH_MODEL_TARGET_*を指定する
+  void setEnvId(int target, int envId) {
+    int status = ailiaSpeech.ailiaSpeechSetEnvId(
+      ppAilia!.value,
+      target,
+      envId,
+    );
+    throwError("ailiaSpeechSetEnvId", status);
+  }
+
   // モデルを開く
   void open(
     File encoder,
@@ -555,6 +576,16 @@ class AiliaSpeechModel {
 
     available = true;
     postProcess = false;
+  }
+
+  // ダミー入力で推論を1回実行し、グラフを事前に構築する (openの後に呼び出す必要がある)
+  void warmup() {
+    if (!available) {
+      throw Exception("Model not opened yet. wait one second and try again.");
+    }
+
+    int status = ailiaSpeech.ailiaSpeechWarmup(ppAilia!.value);
+    throwError("ailiaSpeechWarmup", status);
   }
 
   // ポストプロセスのモデルを開く

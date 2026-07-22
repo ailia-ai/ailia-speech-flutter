@@ -3339,6 +3339,133 @@ class ailiaSpeechFFI {
           int Function(ffi.Pointer<AILIASpeech>, double, double, double)>();
 
   /// \~japanese
+  /// @brief グラフの入力Shapeを指定秒数で固定します。
+  /// @param net              ネットワークオブジェクトポインタ
+  /// @param input_in_seconds 入力の固定長(秒)。0を指定すると動的Shape(デフォルト)。
+  /// @return
+  /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+  /// @details
+  /// ailiaSpeechOpenModelFile より前に呼び出す必要があります。
+  /// 入力が固定長に満たない場合は0パディングして推論を実行します。
+  /// VADは30秒とinput_in_secondsの短い方を区間の上限として使用します。
+  /// 現在は AILIA_SPEECH_MODEL_TYPE_SENSEVOICE_SMALL のみ対応です。
+  /// 非対応のモデルタイプでOpenModelした場合 AILIA_STATUS_INVALID_ARGUMENT を返します。
+  ///
+  /// \~english
+  /// @brief Fix the input shape of the graph to the specified length in seconds.
+  /// @param net              A network instance pointer
+  /// @param input_in_seconds Fixed input length in seconds. 0 means dynamic shape (default).
+  /// @return
+  /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
+  /// @details
+  /// This API must be called before ailiaSpeechOpenModelFile.
+  /// When the input is shorter than the fixed length, it is zero padded before inference.
+  /// The VAD uses the shorter of 30 seconds and input_in_seconds as the upper limit of the segment.
+  /// Currently only AILIA_SPEECH_MODEL_TYPE_SENSEVOICE_SMALL is supported.
+  /// If OpenModel is called with an unsupported model type, AILIA_STATUS_INVALID_ARGUMENT is returned.
+  int ailiaSpeechSetStaticInputLength(
+    ffi.Pointer<AILIASpeech> net,
+    int input_in_seconds,
+  ) {
+    return _ailiaSpeechSetStaticInputLength(
+      net,
+      input_in_seconds,
+    );
+  }
+
+  late final _ailiaSpeechSetStaticInputLengthPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Pointer<AILIASpeech>, ffi.Int)>>(
+      'ailiaSpeechSetStaticInputLength');
+  late final _ailiaSpeechSetStaticInputLength =
+      _ailiaSpeechSetStaticInputLengthPtr
+          .asFunction<int Function(ffi.Pointer<AILIASpeech>, int)>();
+
+  /// \~japanese
+  /// @brief 指定したコンポーネントの実行環境(env_id)を個別に設定します。
+  /// @param net     ネットワークオブジェクトポインタ
+  /// @param target  設定対象 (AILIA_SPEECH_MODEL_TARGET_*)
+  /// @param env_id  実行環境ID (ailiaGetEnvironmentで取得)
+  /// @return
+  /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+  /// @details
+  /// ailiaSpeechCreate で指定した env_id を、特定コンポーネントについてのみ上書きします。
+  /// ailiaSpeechOpenModelFile より前に呼び出す必要があります。
+  /// AILIA_SPEECH_MODEL_TARGET_VAD は ailiaSpeechOpenVadFile より前に呼び出す必要があります。
+  /// 例: WhisperのencoderのみQNNで実行し、decoderはCPUで実行する場合に使用します。
+  ///
+  /// \~english
+  /// @brief Set the execution environment (env_id) of the specified component individually.
+  /// @param net     A network instance pointer
+  /// @param target  Target component (AILIA_SPEECH_MODEL_TARGET_*)
+  /// @param env_id  Environment id (obtained by ailiaGetEnvironment)
+  /// @return
+  /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
+  /// @details
+  /// Overrides the env_id specified in ailiaSpeechCreate only for the specified component.
+  /// This API must be called before ailiaSpeechOpenModelFile.
+  /// AILIA_SPEECH_MODEL_TARGET_VAD must be set before ailiaSpeechOpenVadFile.
+  /// For example, use this API to run only the Whisper encoder on QNN while the decoder runs on the CPU.
+  int ailiaSpeechSetEnvId(
+    ffi.Pointer<AILIASpeech> net,
+    int target,
+    int env_id,
+  ) {
+    return _ailiaSpeechSetEnvId(
+      net,
+      target,
+      env_id,
+    );
+  }
+
+  late final _ailiaSpeechSetEnvIdPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<AILIASpeech>, ffi.Int,
+              ffi.Int)>>('ailiaSpeechSetEnvId');
+  late final _ailiaSpeechSetEnvId = _ailiaSpeechSetEnvIdPtr
+      .asFunction<int Function(ffi.Pointer<AILIASpeech>, int, int)>();
+
+  /// \~japanese
+  /// @brief ダミー入力で推論を1回実行し、グラフを事前に構築します。
+  /// @param net ネットワークオブジェクトポインタ
+  /// @return
+  /// 成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+  /// @details
+  /// QNNなどグラフ構築を初回推論時に行うランタイム向けに、無音のダミー入力で推論を1回実行し、
+  /// 初回のailiaSpeechTranscribeの遅延を削減します。
+  /// ailiaSpeechOpenModelFile より後に呼び出す必要があります。
+  /// Whisperの場合は入力Shapeが常に固定のencoderのみを対象とします（decoderは動的Shapeのため対象外）。
+  /// SenseVoiceの場合は ailiaSpeechSetStaticInputLength の設定が必要で、
+  /// 未設定の場合は AILIA_STATUS_INVALID_STATE を返します。
+  ///
+  /// \~english
+  /// @brief Perform one inference with dummy input to build the graph in advance.
+  /// @param net A network instance pointer
+  /// @return
+  /// If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
+  /// @details
+  /// For runtimes such as QNN that build the graph at the first inference, this API performs one inference
+  /// with silent dummy input to reduce the latency of the first ailiaSpeechTranscribe.
+  /// This API must be called after ailiaSpeechOpenModelFile.
+  /// For Whisper, only the encoder, whose input shape is always fixed, is warmed up
+  /// (the decoder is excluded because it requires dynamic shapes).
+  /// For SenseVoice, ailiaSpeechSetStaticInputLength must be set;
+  /// otherwise AILIA_STATUS_INVALID_STATE is returned.
+  int ailiaSpeechWarmup(
+    ffi.Pointer<AILIASpeech> net,
+  ) {
+    return _ailiaSpeechWarmup(
+      net,
+    );
+  }
+
+  late final _ailiaSpeechWarmupPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<AILIASpeech>)>>(
+          'ailiaSpeechWarmup');
+  late final _ailiaSpeechWarmup = _ailiaSpeechWarmupPtr
+      .asFunction<int Function(ffi.Pointer<AILIASpeech>)>();
+
+  /// \~japanese
   /// @brief 認識の途中結果を取得するコールバックを設定します。
   /// @param net ネットワークオブジェクトポインタ
   /// @param callback コールバック
@@ -3599,7 +3726,7 @@ class ailiaSpeechFFI {
   /// @details
   /// このAPIを呼び出すことで、前回のデコード結果などの内部状態を初期化します。
   /// このAPIを呼び出した後、モデルを再び開く必要はありません。
-  /// ailiaSpeechOpenModelFile、ailiaSpeechSetIntermediateCallback、ailiaSpeechSetLanguage、ailiaSpeechSetSilentThreshold、ailiaSpeechSetPromptのステートは保持されます。
+  /// ailiaSpeechOpenModelFile、ailiaSpeechSetIntermediateCallback、ailiaSpeechSetLanguage、ailiaSpeechSetSilentThreshold、ailiaSpeechSetPrompt、ailiaSpeechSetStaticInputLengthのステートは保持されます。
   ///
   /// \~english
   /// @brief It resets the network instance.
@@ -3609,7 +3736,7 @@ class ailiaSpeechFFI {
   /// @details
   /// By calling this API, the internal state such as the previous decoding result is initialized.
   /// There is no need to reopen the model after calling this API.
-  /// The states of ailiaSpeechOpenModelFile, ailiaSpeechSetIntermediateCallback, ailiaSpeechSetLanguage, ailiaSpeechSetSilentThreshold, ailiaSpeechSetPrompt are preserved.
+  /// The states of ailiaSpeechOpenModelFile, ailiaSpeechSetIntermediateCallback, ailiaSpeechSetLanguage, ailiaSpeechSetSilentThreshold, ailiaSpeechSetPrompt, ailiaSpeechSetStaticInputLength are preserved.
   int ailiaSpeechResetTranscribeState(
     ffi.Pointer<AILIASpeech> net,
   ) {
@@ -4359,13 +4486,13 @@ typedef DartAILIA_SPEECH_USER_API_INTERMEDIATE_CALLBACKFunction = int Function(
     ffi.Pointer<ffi.Void> handle, ffi.Pointer<ffi.Char> text);
 typedef AILIASpeechText = _AILIASpeechText;
 
-const int __has_safe_buffers = 1;
+const int __has_safe_buffers = 0;
 
-const int __DARWIN_ONLY_64_BIT_INO_T = 0;
+const int __DARWIN_ONLY_64_BIT_INO_T = 1;
 
 const int __DARWIN_ONLY_UNIX_CONFORMANCE = 1;
 
-const int __DARWIN_ONLY_VERS_1050 = 0;
+const int __DARWIN_ONLY_VERS_1050 = 1;
 
 const int __DARWIN_UNIX03 = 1;
 
@@ -4374,10 +4501,6 @@ const int __DARWIN_64_BIT_INO_T = 1;
 const int __DARWIN_VERS_1050 = 1;
 
 const int __DARWIN_NON_CANCELABLE = 0;
-
-const String __DARWIN_SUF_64_BIT_INO_T = '\$INODE64';
-
-const String __DARWIN_SUF_1050 = '\$1050';
 
 const String __DARWIN_SUF_EXTSN = '\$DARWIN_EXTSN';
 
@@ -4392,6 +4515,10 @@ const int __STDC_WANT_LIB_EXT1__ = 1;
 const int __DARWIN_NO_LONG_LONG = 0;
 
 const int _DARWIN_FEATURE_64_BIT_INODE = 1;
+
+const int _DARWIN_FEATURE_ONLY_64_BIT_INODE = 1;
+
+const int _DARWIN_FEATURE_ONLY_VERS_1050 = 1;
 
 const int _DARWIN_FEATURE_ONLY_UNIX_CONFORMANCE = 1;
 
@@ -4626,6 +4753,12 @@ const int AILIA_SPEECH_POST_PROCESS_TYPE_T5 = 0;
 const int AILIA_SPEECH_POST_PROCESS_TYPE_FUGUMT_EN_JA = 1;
 
 const int AILIA_SPEECH_POST_PROCESS_TYPE_FUGUMT_JA_EN = 2;
+
+const int AILIA_SPEECH_MODEL_TARGET_ENCODER = 0;
+
+const int AILIA_SPEECH_MODEL_TARGET_DECODER = 1;
+
+const int AILIA_SPEECH_MODEL_TARGET_VAD = 2;
 
 const int AILIA_SPEECH_API_CALLBACK_VERSION = 6;
 
