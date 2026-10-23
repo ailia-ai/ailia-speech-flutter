@@ -6,3 +6,4 @@ headers:
     - 'native/ailia_speech.h'
 llvm-path:
   - '/usr/local/opt/llvm@15'
+  - '/opt/homebrew/opt/llvm@16'
