@@ -2,11 +2,8 @@
 
 import 'dart:ffi' as ffi;
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:ffi/ffi.dart'; // malloc
 import 'package:ailia_speech/ailia_speech.dart' as ailia_speech_dart;
-import 'package:ailia/ailia_license.dart';
-import 'dart:convert';
 
 String _ailiaCommonGetPath() {
   if (Platform.isAndroid || Platform.isLinux) {
@@ -386,20 +383,6 @@ class AiliaSpeechModel {
       String errorDetail = p.toDartString();
       throw Exception("$funcName failed $code \n detail $errorDetail");
     }
-  }
-
-  String _pointerCharToString(ffi.Pointer<ffi.Char> pointer) {
-    var length = 0;
-    while (pointer.elementAt(length).value != 0) {
-      length++;
-    }
-
-    var buffer = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      buffer[i] = pointer.elementAt(i).value;
-    }
-
-    return utf8.decode(buffer);
   }
 
   static Map<int, Function(String)> callbacks = {};

@@ -1,5 +1,5 @@
 group 'com.example.ailia_speech'
-version '1.0-SNAPSHOT'
+version '1.6.0'
 
 buildscript {
     ext.kotlin_version = '1.7.10'

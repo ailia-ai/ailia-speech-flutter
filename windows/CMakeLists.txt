@@ -54,14 +54,18 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 if(CMAKE_GENERATOR_PLATFORM MATCHES "^[Aa][Rr][Mm]64$" OR
    CMAKE_SYSTEM_PROCESSOR MATCHES "^([Aa][Rr][Mm]64|aarch64)$")
   set(AILIA_SPEECH_ARCH "arm64")
+  set(ailia_speech_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/ailia_speech.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/ailia_speech_qnn.dll"
+    PARENT_SCOPE
+  )
 else()
   set(AILIA_SPEECH_ARCH "x64")
+  set(ailia_speech_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/ailia_speech.dll"
+    PARENT_SCOPE
+  )
 endif()
-
-set(ailia_speech_bundled_libraries
-  "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/ailia_speech.dll"
-  PARENT_SCOPE
-)
 
 # === Tests ===
 # These unit tests can be run from a terminal after building the example, or
