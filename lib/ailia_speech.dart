@@ -3055,6 +3055,44 @@ class ailiaSpeechFFI {
   late final _ailiaSpeechBuffered = _ailiaSpeechBufferedPtr.asFunction<
       int Function(ffi.Pointer<AILIASpeech>, ffi.Pointer<ffi.UnsignedInt>)>();
 
+  /// Determines whether the end of an utterance has been detected by VAD.
+  ///
+  /// Parameters:
+  ///
+  /// - `net`: A network instance pointer
+  /// - `buffered`: Is detected (1 : Detected, 0 : Not Detected)
+  ///
+  /// Returns:
+  ///
+  /// If this function is successful, it returns  [AILIA_STATUS_SUCCESS] , or an error code otherwise.
+  ///
+  /// Unlike ailiaSpeechBuffered, this function does not return 1 just because 30 seconds worth of data has been accumulated.
+  /// It returns 1 only when speech of speech_sec or longer is followed by silence of no_speech_sec or longer.
+  /// Use this function to recognize audio per utterance, such as waiting for voice commands.
+  /// Silence before the utterance and noise shorter than speech_sec are discarded, so speech after a long silence is recognized from its beginning.
+  /// It also returns 1 without a boundary after ailiaSpeechFinalizeInputData is called.
+  /// While speech continues, data is accumulated until a boundary is detected. Since ailiaSpeechTranscribe processes at most 30 seconds per call,
+  /// speech longer than 30 seconds is processed by calling ailiaSpeechTranscribe repeatedly while this function returns 1.
+  /// To limit the accumulated length, check the number of unprocessed frames with ailiaSpeechGetPosition.
+  /// The detection threshold must be set in advance using ailiaSpeechSetSilentThreshold.
+  /// When 1 is returned, call ailiaSpeechTranscribe.
+  int ailiaSpeechVadBuffered(
+    ffi.Pointer<AILIASpeech> net,
+    ffi.Pointer<ffi.UnsignedInt> buffered,
+  ) {
+    return _ailiaSpeechVadBuffered(
+      net,
+      buffered,
+    );
+  }
+
+  late final _ailiaSpeechVadBufferedPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<AILIASpeech>,
+              ffi.Pointer<ffi.UnsignedInt>)>>('ailiaSpeechVadBuffered');
+  late final _ailiaSpeechVadBuffered = _ailiaSpeechVadBufferedPtr.asFunction<
+      int Function(ffi.Pointer<AILIASpeech>, ffi.Pointer<ffi.UnsignedInt>)>();
+
   /// Determines whether all data has been processed.
   ///
   /// Parameters:
@@ -3477,6 +3515,70 @@ class ailiaSpeechFFI {
               ffi.Pointer<AILIASpeech>)>>('ailiaSpeechGetErrorDetail');
   late final _ailiaSpeechGetErrorDetail = _ailiaSpeechGetErrorDetailPtr
       .asFunction<ffi.Pointer<ffi.Char> Function(ffi.Pointer<AILIASpeech>)>();
+
+  /// Gets the QNN model name for the current device.
+  ///
+  /// Parameters:
+  ///
+  /// - `model_name`: Storage for the QNN model name (for example, "sm8475").
+  ///   The library owns the returned string; the caller must not free it.
+  ///
+  /// Returns:
+  ///
+  /// If this function is successful, it returns  [AILIA_STATUS_SUCCESS] , or an error code otherwise.
+  ///
+  /// The returned name matches the SoC name in the .qnn package filenames emitted by
+  /// ailia_speech_compile_qnn.
+  /// This call lazily loads the QNN plug-in (ailia_speech_qnn).
+  /// An unsupported SoC returns [AILIA_STATUS_OTHER_ERROR]. A missing plug-in returns
+  /// [AILIA_STATUS_UNIMPLEMENTED].
+  int ailiaSpeechGetQNNModelName(
+    ffi.Pointer<ffi.Pointer<ffi.Char>> model_name,
+  ) {
+    return _ailiaSpeechGetQNNModelName(
+      model_name,
+    );
+  }
+
+  late final _ailiaSpeechGetQNNModelNamePtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>>(
+      'ailiaSpeechGetQNNModelName');
+  late final _ailiaSpeechGetQNNModelName = _ailiaSpeechGetQNNModelNamePtr
+      .asFunction<int Function(ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
+
+  /// Configures QNN graph switching.
+  ///
+  /// Parameters:
+  ///
+  /// - `net`: The network instance pointer
+  /// - `enable`: 0: disabled (default), 1: enabled
+  ///
+  /// Returns:
+  ///
+  /// [AILIA_STATUS_SUCCESS] on success, [AILIA_STATUS_INVALID_ARGUMENT]
+  /// for invalid arguments, or [AILIA_STATUS_INVALID_STATE] after opening a model.
+  ///
+  /// Call after ailiaSpeechCreate and before ailiaSpeechOpenModelFile.
+  /// Graphs in a .qnn model are switched on demand to reduce resident HTP memory.
+  /// Switching may increase inference time. ONNX models are unaffected.
+  int ailiaSpeechSetQNNGraphSwitching(
+    ffi.Pointer<AILIASpeech> net,
+    int enable,
+  ) {
+    return _ailiaSpeechSetQNNGraphSwitching(
+      net,
+      enable,
+    );
+  }
+
+  late final _ailiaSpeechSetQNNGraphSwitchingPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Pointer<AILIASpeech>, ffi.Int)>>(
+      'ailiaSpeechSetQNNGraphSwitching');
+  late final _ailiaSpeechSetQNNGraphSwitching =
+      _ailiaSpeechSetQNNGraphSwitchingPtr
+          .asFunction<int Function(ffi.Pointer<AILIASpeech>, int)>();
 }
 
 /// ネットワークオブジェクトのインスタンス

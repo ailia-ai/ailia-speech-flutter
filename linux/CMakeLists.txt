@@ -44,10 +44,21 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
-set(ailia_speech_bundled_libraries
-  "${CMAKE_CURRENT_SOURCE_DIR}/x64/libailia_speech.so"
-  PARENT_SCOPE
-)
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" AILIA_SPEECH_PROCESSOR)
+if(AILIA_SPEECH_PROCESSOR MATCHES "^(arm64|aarch64)$")
+  set(AILIA_SPEECH_ARCH "arm64")
+  set(ailia_speech_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/libailia_speech.so"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/libailia_speech_qnn.so"
+    PARENT_SCOPE
+  )
+else()
+  set(AILIA_SPEECH_ARCH "x64")
+  set(ailia_speech_bundled_libraries
+    "${CMAKE_CURRENT_SOURCE_DIR}/${AILIA_SPEECH_ARCH}/libailia_speech.so"
+    PARENT_SCOPE
+  )
+endif()
 
 # === Tests ===
 # These unit tests can be run from a terminal after building the example.

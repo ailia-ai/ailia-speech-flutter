@@ -405,6 +405,29 @@ class AiliaSpeechModel {
     return 0; // 1で中断
   }
 
+  /// Returns the QNN model name for the current device (for example, `sm8475`)
+  /// without creating an instance. Throws if the QNN plug-in is absent or the
+  /// SoC is unsupported.
+  static String getQNNModelName() {
+    final api = ailia_speech_dart.ailiaSpeechFFI(
+      _ailiaCommonGetLibrary(_ailiaCommonGetSpeechPath()),
+    );
+    final output = calloc<ffi.Pointer<ffi.Char>>();
+    try {
+      final status = api.ailiaSpeechGetQNNModelName(output);
+      if (status != ailia_speech_dart.AILIA_STATUS_SUCCESS) {
+        throw StateError('Failed to get QNN model name. Status: $status');
+      }
+      if (output.value == ffi.nullptr) {
+        throw StateError('QNN model name is null');
+      }
+      return output.value.cast<Utf8>().toDartString();
+    } finally {
+      // The returned string belongs to the library; copy it before freeing output.
+      calloc.free(output);
+    }
+  }
+
   // インスタンスを作成する
   void create(
     bool liveTranscribe,
@@ -455,6 +478,15 @@ class AiliaSpeechModel {
     );
     throwError("ailiaSpeechCreate", status);
     malloc.free(callback);
+  }
+
+  // QNNのグラフスイッチングを設定する（createの後、openの前に呼び出す）
+  void setQNNGraphSwitching(bool enable) {
+    int status = ailiaSpeech.ailiaSpeechSetQNNGraphSwitching(
+      ppAilia!.value,
+      enable ? 1 : 0,
+    );
+    throwError("ailiaSpeechSetQNNGraphSwitching", status);
   }
 
   // モデルを開く
@@ -663,6 +695,16 @@ class AiliaSpeechModel {
     }
     malloc.free(buffered);
     return true;
+  }
+
+  // VADで発話の区切りが検出されたか（ボイスコマンドの待ち受け用、事前にsetSilentThresholdが必要）
+  bool isVadBuffered() {
+    final ffi.Pointer<ffi.UnsignedInt> buffered = malloc<ffi.UnsignedInt>();
+    int status = ailiaSpeech.ailiaSpeechVadBuffered(ppAilia!.value, buffered);
+    bool detected = buffered.value != 0;
+    malloc.free(buffered);
+    throwError("ailiaSpeechVadBuffered", status);
+    return detected;
   }
 
   // 文字起こしを1回だけ実行する
