@@ -556,20 +556,26 @@ class AiliaSpeechModel {
     throwError("ailiaSpeechSetIntermediateCallback", status);
 
     if (vad != null) {
-      const double thresholdVad = 0.5;
-      const double speechSec = 1.0;
-      const double noSpeechSec = 1.0;
-      status = ailiaSpeech.ailiaSpeechSetSilentThreshold(
-        ppAilia!.value,
-        thresholdVad,
-        speechSec,
-        noSpeechSec,
-      );
-      throwError("ailiaSpeechSetSilentThreshold", status);
+      setSilentThreshold(0.5, 1.0, 1.0);
     }
 
     available = true;
     postProcess = false;
+  }
+
+  // 無音判定のしきい値を設定する（VADを指定してopenした後に呼び出す、標準値は0.5, 1.0, 1.0）
+  void setSilentThreshold(
+    double silentThreshold,
+    double speechSec,
+    double noSpeechSec,
+  ) {
+    int status = ailiaSpeech.ailiaSpeechSetSilentThreshold(
+      ppAilia!.value,
+      silentThreshold,
+      speechSec,
+      noSpeechSec,
+    );
+    throwError("ailiaSpeechSetSilentThreshold", status);
   }
 
   // ポストプロセスのモデルを開く
